@@ -28,6 +28,38 @@ int cmp (const void * a, const void * b ) {
     
     return s[0];
 }
+int min(int a, int b);
+
+// Returns value of Binomial Coefficient C(n, k)
+int binomialCoeff(int n, int k)
+{
+    if(n==1) return 0;
+    int C[n+1][k+1];
+    int i, j;
+    
+    // Caculate value of Binomial Coefficient in bottom up manner
+    for (i = 0; i <= n; i++)
+    {
+        for (j = 0; j <= min(i, k); j++)
+        {
+            // Base Cases
+            if (j == 0 || j == i)
+                C[i][j] = 1;
+            
+            // Calculate value using previosly stored values
+            else
+                C[i][j] = C[i-1][j-1] + C[i-1][j];
+        }
+    }
+    
+    return C[n][k];
+}
+
+// A utility function to return minimum of two integers
+int min(int a, int b)
+{
+    return (a<b)? a: b;
+}
 
 
 
@@ -36,42 +68,71 @@ int cmp (const void * a, const void * b ) {
 
 int main(int argc, const char * argv[]) {
     const size_t n = 1<<21;
-    const size_t m = 10;
+    const size_t m = 11;
     uint32_t *X;
-    X = (uint32_t*) malloc(10 * n * sizeof(uint32_t));
-//    unsigned char in[] = {'p','r','i','v','e','t'};    //{0x70, 0x72, 0x69, 0x76, 0x65, 0x74};
+    X = (uint32_t*) malloc(m * n * sizeof(uint32_t));
+
     uint8_t s[50];
     int j = 0;
     uint32_t count;
     for(int k = 0; k<n; k=k+2){
         count = (k>>1)&0xffffffff;
-//        unsigned char test[] = {'\0',count>>24, (count>>16)&0xff, (count>>8)&0xff, count&0xff};
-        
         unsigned char test[] = {'b','l','o','c','k',' ','h','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,count&0xff, (count>>8)&0xff, (count>>16)&0xff, count>>24};
         blake2hash(s, test, 48);
-        for(int i =0; i < m; i=i+2){
+        for(int i =0; i < 10; i=i+2){
             *(X + k*m + i) = (((s[j]<<8)|s[j+1])<<4)|(s[j+2]>>4);
             *(X + k*m + i+1) = ((((s[j+2]&0xf)<<8)|s[j+3])<<8)|s[j+4];
             j = j+5;
         }
-        for(int i =0; i < m; i=i+2){
+        for(int i =0; i < 10; i=i+2){
             *(X + (k+1)*m + i) = (((s[j]<<8)|s[j+1])<<4)|(s[j+2]>>4);
             *(X + (k+1)*m + i+1) = ((((s[j+2]&0xf)<<8)|s[j+3])<<8)|s[j+4];
             j = j+5;
         }
+        *(X + k*m + 10) = k;
+        *(X + (k+1)*m + 10) = k+1;
         j = 0;
     }
-        qsort(X, n, sizeof(uint32_t)*10, cmp);
+        qsort(X, n, sizeof(uint32_t)*11, cmp);
     
     
-    
-        for (int i = 0; i<30; i++){
+ //отображение первых 100 элементов отсортированного начального массива 2^21 строк. последний столбец - индекс строки
+        for (int i = 0; i<100; i++){
             for(int k = 0; k<m; k++){
                 printf("%x ", *(X+ i*m + k));
             }
             printf("\n");
         }
 
+  //определение размера длины массива Х для будущего раунда.
+    uint64_t x1_length = 0;
+    uint32_t temp0 =  *X;
+    int c = 1; //счетчик слов, с коллизией в первых 20 битах
+    for(int i = 1; i<n; i++){
+        uint32_t temp = *(X+i*m);
+        if(temp0==temp) c++;
+        else{
+            temp0 = temp;
+            x1_length = x1_length + binomialCoeff(c, 2);
+            c = 1;
+        }
+
+    }
+
+    //907097
+    uint32_t *X1;
+    X1 = (uint32_t*) malloc(m * x1_length * sizeof(uint32_t));
+    int i=0, k=0; j=0;
+    
+    while (i < n) {
+        uint32_t temp_i = *(X+i*m);
+        k=1;
+        while(temp_i==*(X+i*m+k)){
+            X
+        }
+
+
+    }
 
 
     
@@ -80,7 +141,7 @@ int main(int argc, const char * argv[]) {
 //        p = p^(*(X+ m*sol[i]));
 //    }
 
-    printf("%d\n", p);
+//    printf("%d\n", p);
     free(X);
 
     
