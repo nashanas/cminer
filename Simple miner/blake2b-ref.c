@@ -315,6 +315,7 @@ int blake2b_update( blake2b_state *S, const uint8_t *in, uint64_t inlen )
   return 0;
 }
 
+
 /* Is this correct? */
 int blake2b_final( blake2b_state *S, uint8_t *out, uint8_t outlen )
 {
@@ -374,6 +375,35 @@ int blake2b( uint8_t *out, const void *in, const void *key, const uint8_t outlen
   blake2b_update( S, ( const uint8_t * )in, inlen );
   blake2b_final( S, out, outlen );
   return 0;
+}
+int blake2hash(uint8_t *out, const void *in, const size_t inlen){
+    unsigned char t[] = {0x5a, 0x63, 0x61, 0x73, 0x68, 0x50, 0x6f, 0x57, 0xc8, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00};
+//    const size_t inlen = 6;
+    const size_t outlen = 50;
+    blake2b_state S[1];
+    blake2b_param D[1];
+
+    memset( S, 0, sizeof( blake2b_state ) );
+
+    for( int i = 0; i < 8; ++i ) S->h[i] = blake2b_IV[i];
+
+    for (int i = 0; i<16; i++){
+        D->personal[i] = t[i];
+    }
+    D->digest_length = outlen;
+    D->key_length    = 0;
+    D->fanout        = 1;
+    D->depth         = 1;
+    D->leaf_length   = 0;
+    D->node_offset   = 0;
+    D->node_depth    = 0;
+    D->inner_length  = 0;
+    memset( D->reserved, 0, sizeof( D->reserved ) );
+    memset( D->salt,     0, sizeof( D->salt ) );
+    blake2b_init_param(S, D);
+    blake2b_update( S, ( const uint8_t * )in, inlen );
+    blake2b_final( S, out, outlen );
+    return 0;
 }
 
 #if defined(SUPERCOP)

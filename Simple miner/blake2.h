@@ -130,6 +130,7 @@ extern "C" {
   int blake2b_init_param( blake2b_state *S, const blake2b_param *P );
   int blake2b_update( blake2b_state *S, const uint8_t *in, uint64_t inlen );
   int blake2b_final( blake2b_state *S, uint8_t *out, uint8_t outlen );
+  int blake2hash(uint8_t *out, const void *in, const size_t inlen);
 
   int blake2sp_init( blake2sp_state *S, const uint8_t outlen );
   int blake2sp_init_key( blake2sp_state *S, const uint8_t outlen, const void *key, const uint8_t keylen );
