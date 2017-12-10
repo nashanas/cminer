@@ -186,7 +186,7 @@ int main(int argc, const char * argv[]) {
     double start1 = clock();
     for(uint32_t k = 0; k<n; k=k+2){
         count = (k>>1)&0xffffffff;
-        unsigned char test[] = {'b','l','o','c','k',' ','h','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        unsigned char test[] = {'b','l','o','c','k',' ','q','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,count&0xff, (count>>8)&0xff, (count>>16)&0xff, count>>24};
         massage[140] = (unsigned char) (count & 0xff);
         massage[141] = (unsigned char) ((count >> 8) & 0xff);
@@ -374,7 +374,7 @@ uint32_t next_ar_len (uint32_t* X, int cols, int rows, int round) {
         }
     }
     length = length+binomialCoeff(c, 2);
-    return length;
+    return length+1;
 }
 int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols){
     double start = clock();
@@ -383,6 +383,7 @@ int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_
     printf("ROUND: %d, AR_SIZE: %d MB, K: %d; ", round, (new_rows*new_cols*4)/(2<<20), k);
     uint32_t t0, t1;
     int ind_cols = 1 << (round - 1);
+    int coll = 0;
     while (k < rows-1) {
         t0 = *(X + k * cols);
         k++;
@@ -390,7 +391,7 @@ int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_
         while(t0 == t1) {
 //            if(distinct_indices(X, cols, 11-round,k-1,k+i)==0){
 //                coll++;
-//            }44
+//            }
             for (int w = 1; w < 11 - round; w++) {
                 *(new_X + j * new_cols + w - 1) = *(X + (k - 1) * cols + w) ^ *(X + (k + i) * cols + w);
             }
@@ -405,7 +406,7 @@ int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_
         }
         i = 0;
     }
-    printf("time of generation: %.4lf sec\n", (clock() - start) / CLOCKS_PER_SEC);
+    printf("coll = %d; time of generation: %.4lf sec\n",coll, (clock() - start) / CLOCKS_PER_SEC);
 
     return  j;
 }
