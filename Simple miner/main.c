@@ -115,6 +115,12 @@ int new_ar_last(uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, 
 
 int distinct_indices(uint32_t* X, int cols, int start, int ind1, int ind2);
 
+int new_ar_modific(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols);
+
+int new_ar_last_modific(uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols, int k);
+
+int distinct(uint32_t* X, int cols, int row) ;
+
 // Returns value of Binomial Coefficient C(n, k)
 int binomialCoeff(int n, int k)
 {
@@ -148,22 +154,11 @@ int min(int a, int b)
 }
 
 
-void print_ar(const uint32_t *X, int row, int col){
-    for(int i=0; i< row; i++){
-        printf("[%d] ",i);
-        for(int j = 0; j< col; j++){
-            printf("%d, " ,*(X+i*col + j));
-//            printf("%x ", *(X+i*col + j));
-        }
-        printf("\n");
-    }
-    printf("----------------------------------------------------------------\n");
-}
 void print_ar_from_to(const uint32_t *X, int col, int start, int end){
     for(int i=start; i< end; i++){
         printf("[%d] ",i);
         for(int j = 0; j< col; j++){
-            printf("%x " ,*(X+i*col + j));
+            printf("%d, " ,*(X+i*col + j));
 //            printf("%x ", *(X+i*col + j));
         }
         printf("\n");
@@ -186,7 +181,7 @@ int main(int argc, const char * argv[]) {
     double start1 = clock();
     for(uint32_t k = 0; k<n; k=k+2){
         count = (k>>1)&0xffffffff;
-        unsigned char test[] = {'b','l','o','c','k',' ','q','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        unsigned char test[] = {'b','l','o','c','k',' ','h','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,count&0xff, (count>>8)&0xff, (count>>16)&0xff, count>>24};
         massage[140] = (unsigned char) (count & 0xff);
         massage[141] = (unsigned char) ((count >> 8) & 0xff);
@@ -309,6 +304,137 @@ int main(int argc, const char * argv[]) {
     X7 = (uint32_t*) malloc(x7_col * x7_length * sizeof(uint32_t));
     new_ar(8, X6, x6_length, x6_col, X7, x7_length, x7_col);
 
+
+    /*
+    //round 2
+    uint32_t x1_length = next_ar_len(X0, 11, x0_length,2); //определение размера нового массива
+    uint32_t *X1;
+    uint16_t x1_col = 10;
+    X1 = (uint32_t*) malloc(x1_col * x1_length * sizeof(uint32_t));
+    new_ar_modific(2, X0, x0_length, m, X1, x1_length, x1_col);
+    qsort(X1, x1_length, sizeof(uint32_t)*x1_col, cmp2); //сортировка
+
+    //round 3
+    uint32_t x2_length = next_ar_len(X1, x1_col, x1_length, 3); //определение размера нового массива
+    uint32_t *X2;
+    uint16_t x2_col = 9;
+    X2 = (uint32_t*) malloc(x2_col * x2_length * sizeof(uint32_t));
+    new_ar_modific(3, X1, x1_length, x1_col, X2, x2_length, x2_col);
+    qsort(X2, x2_length, sizeof(uint32_t)*x2_col, cmp3); //сортировка
+
+    //round 4
+    uint32_t x3_length = next_ar_len(X2, x2_col, x2_length, 4); //определение размера нового массива
+    uint32_t *X3;
+    uint16_t x3_col = 8;
+    X3 = (uint32_t*) malloc(x3_col * x3_length * sizeof(uint32_t));
+    new_ar_modific(4, X2, x2_length, x2_col, X3, x3_length, x3_col);
+    qsort(X3, x3_length, sizeof(uint32_t)*x3_col, cmp4); //сортировка
+
+    //round 4
+    uint32_t x4_length = next_ar_len(X3, x3_col, x3_length, 5); //определение размера нового массива
+    uint32_t *X4;
+    uint16_t x4_col = 7;
+    X4 = (uint32_t*) malloc(x4_col * x4_length * sizeof(uint32_t));
+    new_ar_modific(5, X3, x3_length, x3_col, X4, x4_length, x4_col);
+    qsort(X4, x4_length, sizeof(uint32_t)*x4_col, cmp5); //сортировка
+
+    //round 5
+    uint32_t x5_length = next_ar_len(X4, x4_col, x4_length, 6); //определение размера нового массива
+    uint32_t *X5;
+    uint16_t x5_col = 6;
+    X5 = (uint32_t*) malloc(x5_col * x5_length * sizeof(uint32_t));
+    new_ar_modific(6, X4, x4_length, x4_col, X5, x5_length, x5_col);
+    qsort(X5, x5_length, sizeof(uint32_t)*x5_col, cmp6); //сортировка
+
+    //round 6
+    uint32_t x6_length = next_ar_len(X5, x5_col, x5_length, 7); //определение размера нового массива
+    uint32_t *X6;
+    uint16_t x6_col = 5;
+    X6 = (uint32_t*) malloc(x6_col * x6_length * sizeof(uint32_t));
+    new_ar_modific(7, X5, x5_length, x5_col, X6, x6_length, x6_col);
+    qsort(X6, x6_length, sizeof(uint32_t)*x6_col, cmp7); //сортировка
+
+    //round 7
+    uint32_t x7_length = next_ar_len(X6, x6_col, x6_length, 8); //определение размера нового массива
+    uint32_t *X7;
+    uint16_t x7_col = 4;
+    X7 = (uint32_t*) malloc(x7_col * x7_length * sizeof(uint32_t));
+    new_ar_modific(8, X6, x6_length, x6_col, X7, x7_length, x7_col);
+    qsort(X7, x7_length, sizeof(uint32_t)*x7_col, cmp8); //сортировка
+
+
+    int k =0;
+    for(k = 0; k< x7_length; k++){
+        if(*(X7+k*x7_col+1)!=0) break;
+    }
+    uint32_t x8_length = 0;
+    uint32_t temp00 =  *X7+k*x7_col;
+    uint32_t temp01 =  *X7+k*x7_col+1;
+    int c = 1; //счетчик слов, с коллизией в первых 20 битах
+    for(int i = 1+k; i<x7_length; i++){
+        uint32_t temp10 = *(X7 + i*x7_col);
+        uint32_t temp11 = *(X7 + i*x7_col+1);
+        if((temp10==temp00) && (temp11 == temp01)){
+            c++;
+        }
+        else{
+            temp00 = temp10;
+            temp01 = temp11;
+            x8_length = x8_length + binomialCoeff(c, 2);
+            c = 1;
+        }
+    }
+    x8_length = x8_length+binomialCoeff(c, 2);
+
+    uint32_t *X8;
+    uint16_t x8_col = 2;
+    X8 = (uint32_t*) malloc(x8_col * x8_length * sizeof(uint32_t));
+
+    uint32_t *S;
+    S = (uint32_t*) malloc(512 * x8_length * sizeof(uint32_t));
+
+    int sol_count =  new_ar_last_modific(X7,x7_length, x7_col, X8, x8_length, 2, k);
+    print_ar_from_to(X8, 2, 0, sol_count);
+
+
+    int q0=0,q1=0,q2=0,q3=0,q4=0,q5=0,q6=0,q7=0,q=0;
+    int f = 0;
+    for(int y =0; y<sol_count; y++) {
+        for(q=0; q<2; q++) {
+        for(q0=0; q0<2; q0++) {
+            for(q1=0; q1<2; q1++) {
+                for (q2 = 0; q2 < 2; q2++) {
+                    for (q3 = 0; q3 < 2; q3++) {
+                        for (q4 = 0; q4 < 2; q4++) {
+                            for (q5 = 0; q5 < 2; q5++) {
+                                for (q6 = 0; q6 < 2; q6++) {
+                                    for (q7 = 0; q7 < 2; q7++) {
+                                        int i7 = *(X7 + 2 + x7_col * (*(X8+y*2+q))+q0);
+                                        int i6 = *(X6 + 3 + x6_col * i7 + q1);
+                                        int i5 = *(X5 + 4 + x5_col * i6 + q2);
+                                        int i4 = *(X4 + 5 + x4_col * i5 + q3);
+                                        int i3 = *(X3 + 6 + x3_col * i4 + q4);
+                                        int i2 = *(X2 + 7 + x2_col * i3 + q5);
+                                        int i1 = *(X1 + 8 + x1_col * i2 + q6);
+                                        int i0 = *(X0 + 9 + x0_col * i1 + q7);
+                                        *(S + f) = i0;
+                                    }}}}}}}}}}
+
+    for(int i = 0; i< sol_count; i++){
+        int collision = distinct(S, 512, i);
+        if(collision==1) {
+            print_ar_from_to(S,512,i,i+1);
+            printf("ne bilo\n");
+        }
+    }
+
+    printf("%.4lf sec\n", (clock() - start) / CLOCKS_PER_SEC);
+
+    return 0;
+     */
+
+
+
     //последний раунд
     start1 = clock();
     qsort(X7, x7_length, sizeof(uint32_t)*x7_col, cmp8);
@@ -352,12 +478,20 @@ int main(int argc, const char * argv[]) {
 
     int sol_count = new_ar_last(X7,x7_length, x7_col, X8, x8_length, 512, k);
 
-    print_ar(X8, sol_count, 512);
+    print_ar_from_to(X8, 512, 0, sol_count);
 
     printf("%.4lf sec\n", (clock() - start) / CLOCKS_PER_SEC);
     return 0;
-}
 
+}
+int distinct(uint32_t* X, int cols, int row) {
+    for(int i = 0; i < cols; i++){
+        for(int j = i+1; j < cols; j++){
+            if(*(X+row*cols+i)==*(X+row*cols+j)) return 0;
+        }
+    }
+    return 1;
+}
 uint32_t next_ar_len (uint32_t* X, int cols, int rows, int round) {
 
     int k = first_non_zero_indic(X, rows,cols, round);
@@ -366,7 +500,10 @@ uint32_t next_ar_len (uint32_t* X, int cols, int rows, int round) {
     int c = 1;
     for(int i = 1+k; i<rows; i++){
         uint32_t temp = *(X + i*cols);
-        if(temp0==temp) c++;
+        if(temp0==temp) {
+            c++;
+
+        }
         else{
             temp0 = temp;
             length = length + binomialCoeff(c, 2);
@@ -404,7 +541,8 @@ int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_
             i++;
             t1 = *(X + (k + i) * cols);
         }
-        i = 0;
+
+        i=0;
     }
     printf("coll = %d; time of generation: %.4lf sec\n",coll, (clock() - start) / CLOCKS_PER_SEC);
 
@@ -488,4 +626,69 @@ int distinct_indices(uint32_t* X, int cols, int start, int ind1, int ind2){
     }
     return 1;
 }
+int new_ar_modific(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols){
+    double start = clock();
+    int i=0, j=0;
+    int k = first_non_zero_indic(X, rows, cols, round);
+    printf("ROUND: %d, AR_SIZE: %d MB, K: %d; ", round, (new_rows*new_cols*4)/(2<<20), k);
+    uint32_t t0, t1;
+    int coll = 0;
+    while (k < rows-1) {
+        t0 = *(X + k * cols);
+        k++;
+        t1 = *(X + k * cols);
+        while(t0 == t1) {
+
+            for (int w = 1; w < 11 - round; w++) {
+                *(new_X + j * new_cols + w - 1) = *(X + (k - 1) * cols + w) ^ *(X + (k + i) * cols + w);
+            }
+            *(new_X + j * new_cols + 10 - round + 0) = (uint32_t) (k - 1);
+            *(new_X + j * new_cols + 10 - round + 1) = (uint32_t) (k + i);
+
+            j++;
+            i++;
+            t1 = *(X + (k + i) * cols);
+        }
+
+        i=0;
+    }
+    printf("coll = %d; time of generation: %.4lf sec\n",coll, (clock() - start) / CLOCKS_PER_SEC);
+
+    return  j;
+}
+
+int new_ar_last_modific(uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols, int k){
+    double start = clock();
+    printf("LAST ROUND start size: %d ", (new_rows*new_cols*4)/(2<<20));
+    int i=0, j=0;
+    uint32_t t00, t01, t10, t11;
+
+    int coll = 0;
+
+    while (k < rows-1) {
+        t00 = *(X + k * cols);
+        t01 = *(X + k * cols +1);
+
+        k++;
+
+        t10 = *(X + k * cols );
+        t11 = *(X + k * cols +1);
+        while((t00 == t10 )&&( t01 == t11)){
+            if(distinct_indices(X, cols, 2, k-1, k+i)==1) {
+                    *(new_X + j * new_cols ) = (uint32_t) (k - 1);
+                    *(new_X + j * new_cols + 1) = (uint32_t) (k + i);
+                j++;
+            } else{coll++;}
+            i++;
+            t10 = *(X + (k + i) * cols);
+            t11 = *(X + (k + i) * cols +1);
+        }
+        i = 0;
+    }
+    printf("end size: %d; time of generation: %.4lf sec\n", (j*new_cols*4)/(2<<20), (clock() - start) / CLOCKS_PER_SEC);
+
+    return  j;
+}
+
+
 
