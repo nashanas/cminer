@@ -30,13 +30,19 @@ int new_ar(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_
 
 //функция - компаратор для сортировки qsort, определяет корректно только для 10 -ти первых элементов массива
 //    qsort(X, n, sizeof(uint32_t)*11, cmpmem);  //сортировка
+/*
+int
+strcmp(const char *s1, const char *s2)
+{
+    for ( ; *s1 == *s2; s1++, s2++)
+        if (*s1 == '\0')
+            return 0;
+    return ((*(unsigned char *)s1 < *(unsigned char *)s2) ? -1 : +1);
+}
+*/
+
+
 int cmp (const void * a, const void * b ) {
-//    uint32_t s1[10], s2[10];
-    int32_t s[10];
-    for(int i = 0; i< 10; i++){
-        s[i] = ( *((int*)a+i))-( *((int*)b+i));
-        if(s[i]!=0) return s[i];
-    }
     return  *((uint32_t *)a)- ( *((uint32_t *)b));
 }
 int cmp1 (const void * a, const void * b ) {
@@ -111,8 +117,6 @@ void xor(uint32_t* X, uint32_t* sol, int sol_len);
 
 int first_non_zero_indic(uint32_t* X, int rows, int col, int round);
 
-int new_ar_last(uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols, int k);
-
 int distinct_indices(uint32_t* X, int cols, int start, int ind1, int ind2);
 
 int new_ar_modific(int round, uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols);
@@ -178,15 +182,20 @@ int main(int argc, const char * argv[]) {
     int j = 0;
     uint32_t count;
     printf("START\n");
+
+
+
     double start1 = clock();
+    unsigned char test[] = {'b','l','o','c','k',' ','h','e','a','d','e','r',0xa,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
     for(uint32_t k = 0; k<n; k=k+2){
         count = (k>>1)&0xffffffff;
-        unsigned char test[] = {'b','l','o','c','k',' ','h','e','a','d','e','r',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,count&0xff, (count>>8)&0xff, (count>>16)&0xff, count>>24};
-        massage[140] = (unsigned char) (count & 0xff);
-        massage[141] = (unsigned char) ((count >> 8) & 0xff);
-        massage[142] = (unsigned char) ((count >> 16) & 0xff);
-        massage[143] = (unsigned char) (count >> 24);
+
+        test[44] = (unsigned char) (count & 0xff);
+        test[45] = (unsigned char) ((count >> 8) & 0xff);
+        test[46] = (unsigned char) ((count >> 16) & 0xff);
+        test[47] = (unsigned char) (count >> 24);
         blake2hash(s, test, 48);
         for(int i =0; i < 10; i=i+2){
             *(X + k*m + i) = (((s[j]<<8)|s[j+1])<<4)|(s[j+2]>>4);
@@ -205,9 +214,9 @@ int main(int argc, const char * argv[]) {
     printf("first array generating: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
     start1 = clock();
 
-    uint32_t *X_source;
-    X_source = (uint32_t*) malloc(m * n * sizeof(uint32_t));
-    memcpy(X_source, X, m * n * sizeof(uint32_t));
+//    uint32_t *X_source;
+//    X_source = (uint32_t*) malloc(m * n * sizeof(uint32_t));
+//    memcpy(X_source, X, m * n * sizeof(uint32_t));
 
     qsort(X, n, sizeof(uint32_t)*11, cmp);  //сортировка
     printf("copy array and first sort: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
@@ -224,95 +233,15 @@ int main(int argc, const char * argv[]) {
     qsort(X0, x0_length, sizeof(uint32_t)*11, cmp1); //сортировка
     printf("sort 2: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
-    uint32_t x1_length = next_ar_len(X0, 11, x0_length,2); //определение размера нового массива
-    uint32_t *X1;
-    uint16_t x1_col = 12;
-    X1 = (uint32_t*) malloc(x1_col * x1_length * sizeof(uint32_t));
-    new_ar(2, X0, x0_length, m, X1, x1_length, x1_col);
-
-    //раунд 3
-    start1 = clock();
-    qsort(X1, x1_length, sizeof(uint32_t)*x1_col, cmp2); //сортировка
-    printf("sort 3: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-
-
-
-    uint32_t x2_length = next_ar_len(X1, x1_col, x1_length,3); //определение размера нового массива
-    uint32_t *X2;
-    uint16_t x2_col = 15;
-    X2 = (uint32_t*) malloc(x2_col * x2_length * sizeof(uint32_t));
-    new_ar(3, X1, x1_length, x1_col, X2, x2_length, x2_col);
-
-//    free(X0);
-    //раунд 4
-
-    start1 = clock();
-    qsort(X2, x2_length, sizeof(uint32_t)*x2_col, cmp3); //сортировка
-    printf("sort 4: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-
-    uint32_t x3_length = next_ar_len(X2, x2_col, x2_length,4); //определение размера нового массива
-    uint32_t *X3;
-    uint16_t x3_col = 22;
-    X3 = (uint32_t*) malloc(x3_col * x3_length * sizeof(uint32_t));
-    new_ar(4, X2, x2_length, x2_col, X3, x3_length, x3_col);
-
-
-    //раунд 5
-    start1 = clock();
-    qsort(X3, x3_length, sizeof(uint32_t)*x3_col, cmp4); //сортировка
-    printf("sort 5: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-    uint32_t x4_length = next_ar_len(X3, x3_col, x3_length, 5); //определение размера нового массива
-    uint32_t *X4;
-    uint16_t x4_col = 37;
-    X4 = (uint32_t*) malloc(x4_col * x4_length * sizeof(uint32_t));
-    new_ar(5, X3, x3_length, x3_col, X4, x4_length, x4_col);
-
-
-    //раунд 6
-    start1 = clock();
-    qsort(X4, x4_length, sizeof(uint32_t)*x4_col, cmp5); //сортировка
-    printf("sort 6: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-    uint32_t x5_length =  next_ar_len(X4, x4_col, x4_length, 6); ; //определение размера нового массива
-    uint32_t *X5;
-    uint16_t x5_col = 68;
-    X5 = (uint32_t*) malloc(x5_col * x5_length * sizeof(uint32_t));
-    new_ar(6, X4, x4_length, x4_col, X5, x5_length, x5_col);
-
-    //раунд 7
-    start1 = clock();
-    qsort(X5, x5_length, sizeof(uint32_t)*x5_col, cmp6); //сортировка
-    printf("sort 7: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-    uint32_t x6_length =  next_ar_len(X5, x5_col, x5_length, 7); ; //определение размера нового массива
-    uint32_t *X6;
-    uint16_t x6_col = 131;
-    X6 = (uint32_t*) malloc(x6_col * x6_length * sizeof(uint32_t));
-    new_ar(7, X5, x5_length, x5_col, X6, x6_length, x6_col);
-
-    //раунд 8
-    start1 = clock();
-    qsort(X6, x6_length, sizeof(uint32_t)*x6_col, cmp7); //сортировка
-    printf("sort 7: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
-    uint32_t x7_length =  next_ar_len(X6, x6_col, x6_length, 8); //определение размера нового массива
-    uint32_t *X7;
-    uint16_t x7_col = 258;
-    X7 = (uint32_t*) malloc(x7_col * x7_length * sizeof(uint32_t));
-    new_ar(8, X6, x6_length, x6_col, X7, x7_length, x7_col);
-
-
-    /*
     //round 2
     uint32_t x1_length = next_ar_len(X0, 11, x0_length,2); //определение размера нового массива
     uint32_t *X1;
     uint16_t x1_col = 10;
     X1 = (uint32_t*) malloc(x1_col * x1_length * sizeof(uint32_t));
     new_ar_modific(2, X0, x0_length, m, X1, x1_length, x1_col);
+    start1 = clock();
     qsort(X1, x1_length, sizeof(uint32_t)*x1_col, cmp2); //сортировка
+    printf("sort 3: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 3
     uint32_t x2_length = next_ar_len(X1, x1_col, x1_length, 3); //определение размера нового массива
@@ -320,7 +249,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x2_col = 9;
     X2 = (uint32_t*) malloc(x2_col * x2_length * sizeof(uint32_t));
     new_ar_modific(3, X1, x1_length, x1_col, X2, x2_length, x2_col);
+    start1 = clock();
     qsort(X2, x2_length, sizeof(uint32_t)*x2_col, cmp3); //сортировка
+    printf("sort 4: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 4
     uint32_t x3_length = next_ar_len(X2, x2_col, x2_length, 4); //определение размера нового массива
@@ -328,7 +259,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x3_col = 8;
     X3 = (uint32_t*) malloc(x3_col * x3_length * sizeof(uint32_t));
     new_ar_modific(4, X2, x2_length, x2_col, X3, x3_length, x3_col);
+    start1 = clock();
     qsort(X3, x3_length, sizeof(uint32_t)*x3_col, cmp4); //сортировка
+    printf("sort 5: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 4
     uint32_t x4_length = next_ar_len(X3, x3_col, x3_length, 5); //определение размера нового массива
@@ -336,7 +269,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x4_col = 7;
     X4 = (uint32_t*) malloc(x4_col * x4_length * sizeof(uint32_t));
     new_ar_modific(5, X3, x3_length, x3_col, X4, x4_length, x4_col);
+    start1 = clock();
     qsort(X4, x4_length, sizeof(uint32_t)*x4_col, cmp5); //сортировка
+    printf("sort 6: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 5
     uint32_t x5_length = next_ar_len(X4, x4_col, x4_length, 6); //определение размера нового массива
@@ -344,7 +279,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x5_col = 6;
     X5 = (uint32_t*) malloc(x5_col * x5_length * sizeof(uint32_t));
     new_ar_modific(6, X4, x4_length, x4_col, X5, x5_length, x5_col);
+    start1 = clock();
     qsort(X5, x5_length, sizeof(uint32_t)*x5_col, cmp6); //сортировка
+    printf("sort 7: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 6
     uint32_t x6_length = next_ar_len(X5, x5_col, x5_length, 7); //определение размера нового массива
@@ -352,7 +289,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x6_col = 5;
     X6 = (uint32_t*) malloc(x6_col * x6_length * sizeof(uint32_t));
     new_ar_modific(7, X5, x5_length, x5_col, X6, x6_length, x6_col);
+    start1 = clock();
     qsort(X6, x6_length, sizeof(uint32_t)*x6_col, cmp7); //сортировка
+    printf("sort 8: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
     //round 7
     uint32_t x7_length = next_ar_len(X6, x6_col, x6_length, 8); //определение размера нового массива
@@ -360,7 +299,9 @@ int main(int argc, const char * argv[]) {
     uint16_t x7_col = 4;
     X7 = (uint32_t*) malloc(x7_col * x7_length * sizeof(uint32_t));
     new_ar_modific(8, X6, x6_length, x6_col, X7, x7_length, x7_col);
+    start1 = clock();
     qsort(X7, x7_length, sizeof(uint32_t)*x7_col, cmp8); //сортировка
+    printf("sort 9: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
 
 
     int k =0;
@@ -394,10 +335,11 @@ int main(int argc, const char * argv[]) {
     S = (uint32_t*) malloc(512 * x8_length * sizeof(uint32_t));
 
     int sol_count =  new_ar_last_modific(X7,x7_length, x7_col, X8, x8_length, 2, k);
-    print_ar_from_to(X8, 2, 0, sol_count);
+//    print_ar_from_to(X8, 2, 0, sol_count);
 
-
+    start1 = clock();
     int q0=0,q1=0,q2=0,q3=0,q4=0,q5=0,q6=0,q7=0,q=0;
+    int i0=0,i1=0,i2=0,i3=0,i4=0,i5=0,i6=0,i7=0;
     int f = 0;
     for(int y =0; y<sol_count; y++) {
         for(q=0; q<2; q++) {
@@ -409,78 +351,29 @@ int main(int argc, const char * argv[]) {
                             for (q5 = 0; q5 < 2; q5++) {
                                 for (q6 = 0; q6 < 2; q6++) {
                                     for (q7 = 0; q7 < 2; q7++) {
-                                        int i7 = *(X7 + 2 + x7_col * (*(X8+y*2+q))+q0);
-                                        int i6 = *(X6 + 3 + x6_col * i7 + q1);
-                                        int i5 = *(X5 + 4 + x5_col * i6 + q2);
-                                        int i4 = *(X4 + 5 + x4_col * i5 + q3);
-                                        int i3 = *(X3 + 6 + x3_col * i4 + q4);
-                                        int i2 = *(X2 + 7 + x2_col * i3 + q5);
-                                        int i1 = *(X1 + 8 + x1_col * i2 + q6);
-                                        int i0 = *(X0 + 9 + x0_col * i1 + q7);
-                                        *(S + f) = i0;
+                                        i7 = *(X7 + 2 + x7_col * (*(X8+y*2+q))+q0);
+                                        i6 = *(X6 + 3 + x6_col * i7 + q1);
+                                        i5 = *(X5 + 4 + x5_col * i6 + q2);
+                                        i4 = *(X4 + 5 + x4_col * i5 + q3);
+                                        i3 = *(X3 + 6 + x3_col * i4 + q4);
+                                        i2 = *(X2 + 7 + x2_col * i3 + q5);
+                                        i1 = *(X1 + 8 + x1_col * i2 + q6);
+                                        i0 = *(X0 + 9 + x0_col * i1 + q7);
+                                        *(S + f) = (uint32_t) i0;
+                                        f = f + 1;
                                     }}}}}}}}}}
+    printf("solution gen time: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
+
 
     for(int i = 0; i< sol_count; i++){
         int collision = distinct(S, 512, i);
         if(collision==1) {
             print_ar_from_to(S,512,i,i+1);
-            printf("ne bilo\n");
         }
     }
 
     printf("%.4lf sec\n", (clock() - start) / CLOCKS_PER_SEC);
 
-    return 0;
-     */
-
-
-
-    //последний раунд
-    start1 = clock();
-    qsort(X7, x7_length, sizeof(uint32_t)*x7_col, cmp8);
-    printf("last round sort: %.4lf sec\n", (clock() - start1) / CLOCKS_PER_SEC);
-
- int k =0;
-    for(k = 0; k< x7_length; k++){
-        if(*(X7+k*x7_col+1)!=0) break;
-    }
-    printf("K = %d \n", k);
-    uint32_t x8_length = 0;
-    uint32_t temp00 =  *X7+k*x7_col;
-    uint32_t temp01 =  *X7+k*x7_col+1;
-    int c = 1; //счетчик слов, с коллизией в первых 20 битах
-    for(int i = 1+k; i<x7_length; i++){
-        uint32_t temp10 = *(X7 + i*x7_col);
-        uint32_t temp11 = *(X7 + i*x7_col+1);
-        if((temp10==temp00) && (temp11 == temp01)){
-            c++;
-        }
-        else{
-            temp00 = temp10;
-            temp01 = temp11;
-            x8_length = x8_length + binomialCoeff(c, 2);
-            c = 1;
-        }
-    }
-    x8_length = x8_length+binomialCoeff(c, 2);
-    printf("size: %d \n",x8_length);
-    free(X);
-    free(X1);
-    free(X2);
-    free(X3);
-    free(X4);
-    free(X5);
-    free(X6);
-
-    uint32_t *X8;
-    uint16_t x8_col = 512;
-    X8 = (uint32_t*) malloc(x8_col * x8_length * sizeof(uint32_t));
-
-    int sol_count = new_ar_last(X7,x7_length, x7_col, X8, x8_length, 512, k);
-
-    print_ar_from_to(X8, 512, 0, sol_count);
-
-    printf("%.4lf sec\n", (clock() - start) / CLOCKS_PER_SEC);
     return 0;
 
 }
@@ -582,41 +475,6 @@ void xor(uint32_t* X, uint32_t* sol, int sol_len){
     printf("\n-------------------------------------------------------\n");
 
 }
-int new_ar_last(uint32_t* X, int rows, int cols, uint32_t* new_X, int new_rows, int new_cols, int k){
-    double start = clock();
-    printf("LAST ROUND start size: %d ", (new_rows*new_cols*4)/(2<<20));
-    int i=0, j=0;
-    uint32_t t00, t01, t10, t11;
-    int ind_cols = 256;
-    int coll = 0;
-
-    while (k < rows-1) {
-        t00 = *(X + k * cols);
-        t01 = *(X + k * cols +1);
-
-        k++;
-
-        t10 = *(X + k * cols );
-        t11 = *(X + k * cols +1);
-        while((t00 == t10 )&&( t01 == t11)){
-            if(distinct_indices(X, cols, 2, k-1, k+i)==1) {
-                for (int h = 0; h < ind_cols; h++) {
-                    *(new_X + j * new_cols + h) = *(X + (k - 1) * cols + 2 + h);
-                    *(new_X + j * new_cols + ind_cols + h) = *(X + (k + i) * cols + 2 + h);
-                }
-                j++;
-            } else{coll++;}
-            i++;
-            t10 = *(X + (k + i) * cols);
-            t11 = *(X + (k + i) * cols +1);
-        }
-        i = 0;
-    }
-    printf("end size: %d; time of generation: %.4lf sec\n", (j*new_cols*4)/(2<<20), (clock() - start) / CLOCKS_PER_SEC);
-
-    return  j;
-}
-
 
 int distinct_indices(uint32_t* X, int cols, int start, int ind1, int ind2){
     for(int x = start; x< cols; x++){
@@ -689,6 +547,67 @@ int new_ar_last_modific(uint32_t* X, int rows, int cols, uint32_t* new_X, int ne
 
     return  j;
 }
+int findLargestNum(int * array, int size){
+
+    int i;
+    int largestNum = -1;
+
+    for(i = 0; i < size; i++){
+        if(array[i] > largestNum)
+            largestNum = array[i];
+    }
+
+    return largestNum;
+}
+/*
+void radixSort(int * array, int size){
+
+    printf("\n\nRunning Radix Sort on Unsorted List!\n\n");
+
+    // Base 10 is used
+    int i;
+    int semiSorted[size];
+    int significantDigit = 1;
+    int largestNum = findLargestNum(array, size);
+
+    // Loop until we reach the largest significant digit
+    while (largestNum / significantDigit > 0){
+        printf("\tSorting: %d's place ", significantDigit);
+        printArray(array, size);
+
+        int bucket[10] = { 0 };
+
+        // Counts the number of "keys" or digits that will go into each bucket
+        for (i = 0; i < size; i++)
+            bucket[(array[i] / significantDigit) % 10]++;
+
+        */
+/**
+         * Add the count of the previous buckets,
+         * Acquires the indexes after the end of each bucket location in the array
+             * Works similar to the count sort algorithm
+         **//*
+
+        for (i = 1; i < 10; i++)
+            bucket[i] += bucket[i - 1];
+
+        // Use the bucket to fill a "semiSorted" array
+        for (i = size - 1; i >= 0; i--)
+            semiSorted[--bucket[(array[i] / significantDigit) % 10]] = array[i];
+
+
+        for (i = 0; i < size; i++)
+            array[i] = semiSorted[i];
+
+        // Move to next significant digit
+        significantDigit *= 10;
+
+        printf("\n\tBucket: ");
+        printArray(bucket, 10);
+    }
+}
+*/
+
 
 
 
